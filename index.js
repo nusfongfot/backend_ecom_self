@@ -1,7 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+
 const port = process.env.PORT || 3000;
+const host = "0.0.0.0";
 require("dotenv").config();
 
 const authRoute = require("./routes/authRoute");
@@ -29,6 +31,6 @@ app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1", authenticate, uploadRoute);
 app.use("/api/v1", authenticate, profileRoute);
 
-app.listen(port, () => {
+app.listen(port, host, () => {
   console.log("Listening on port", port);
 });
