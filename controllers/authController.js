@@ -78,8 +78,9 @@ exports.register = async (req, res, next) => {
     if (password.trim() != confirmPassword.trim()) {
       return res.status(400).send({ message: "password don't match" });
     }
-    const hashedPassword = await bcrypt.hash(password, 12);
-
+    let hashedPassword;
+    hashedPassword = await bcrypt.hash(password, 12);
+    password = hashedPassword
     client.query(
       `SELECT email, username FROM customers WHERE email = ? OR username = ?`,
       [email, username],
@@ -92,7 +93,7 @@ exports.register = async (req, res, next) => {
         } else {
           client.query(
             `INSERT INTO customers (username,email, password) VALUES (?,?,?)`,
-            [username, email, hashedPassword],
+            [username, email, password],
             function (err, results, fields) {
               return res.status(200).json({ message: "Register Successfully" });
             }

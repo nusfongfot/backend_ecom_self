@@ -19,7 +19,9 @@ exports.createComment = (req, res, next) => {
       `SELECT cus_id, pro_id FROM comments WHERE cus_id = ?`,
       [cus_id],
       function (err, results, fieldsDb) {
-        if (results.length > 0) {
+        const product = results?.some((item) => item.pro_id == pro_id)
+        console.log(product)
+        if (results.length > 0 && product) {
           return res.status(400).json({ message: "You alredy review!" });
         } else {
           client.query(
@@ -43,11 +45,7 @@ exports.getCommentByProductID = (req, res, next) => {
     const id = parseInt(req.params.id);
     client.query(
       `
-      WITH AvgStar AS (
-        SELECT AVG(star) AS avg_star
-        FROM comments
-      )      
-      SELECT c.*,cs.username,avg_star FROM AvgStar,comments c
+      SELECT c.*,cs.username FROM comments c
       INNER JOIN products p ON p.pro_id = c.pro_id
       INNER JOIN customers cs ON cs.cus_id = c.cus_id
       WHERE p.pro_id = ?`,
@@ -56,7 +54,7 @@ exports.getCommentByProductID = (req, res, next) => {
         if (results?.length > 0) {
           return res.status(200).json({ results });
         } else {
-          return res.status(400).json({ message: "comment not found" });
+          return res.status(400).json({ message: "Comment not found" });
         }
       }
     );
