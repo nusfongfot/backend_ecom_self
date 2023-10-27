@@ -77,8 +77,7 @@ exports.createOrder = async (req, res, next) => {
     }
 
     client.query(
-      `INSERT INTO orders (cus_id, pro_id, add_id,items)
-       VALUES (?,?,?,?)`,
+      `INSERT INTO orders (cus_id, pro_id, add_id,items) VALUES (?,?,?,?)`,
       [cus_id, pro_id, add_id],
       function (err, results, fieldsDb) {
         console.log(err)
