@@ -82,7 +82,7 @@ exports.deleteAddress = async (req, res, next) => {
       function (err, results, fields) {
         if (results.length > 0) {
           client.query(
-            "UPDATE address SET deleted = 1 WHERE add_id = ?",
+            "UPDATE address SET deleted = 1 WHERE add_id = ? AND deleted = 0",
             [id],
             function (err, results, fields) {
               return res.status(200).json({ message: "Delete successfully" });

@@ -81,10 +81,11 @@ exports.createOrder = async (req, res, next) => {
        VALUES (?,?,?,?)`,
       [cus_id, pro_id, add_id],
       function (err, results, fieldsDb) {
+        console.log(err)
         if (!!results) {
           return res.status(200).json({ message: "Create order successfully" });
         } else {
-          return res.status(400).json({ message: "can not create order" });
+          return res.status(400).json({ message: "Can not create order" });
         }
       }
     );

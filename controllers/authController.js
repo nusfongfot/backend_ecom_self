@@ -64,18 +64,18 @@ exports.login = async (req, res, next) => {
 exports.register = async (req, res, next) => {
   try {
     const { email, password, confirmPassword, username } = req.body;
-    if (!email) {
+    if (!email.trim()) {
       return res.status(400).send({
         message: "email is required",
       });
     }
 
-    if (!password) {
+    if (!password.trim()) {
       return res.status(400).send({
         message: "password is required",
       });
     }
-    if (!username) {
+    if (!username.trim()) {
       return res.status(400).send({
         message: "username is required",
       });
@@ -99,7 +99,14 @@ exports.register = async (req, res, next) => {
             `INSERT INTO customers (username,email, password) VALUES (?,?,?)`,
             [username, email, hashedPassword],
             function (err, results, fields) {
-              return res.status(200).json({ message: "Register Successfully" });
+              console.log(err);
+              if (!!results) {
+                return res
+                  .status(200)
+                  .json({ message: "Register Successfully" });
+              } else {
+                return res.status(400).json({ message: "Can not register" });
+              }
             }
           );
         }
