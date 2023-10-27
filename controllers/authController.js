@@ -64,23 +64,27 @@ exports.login = async (req, res, next) => {
 exports.register = async (req, res, next) => {
   try {
     const { email, password, confirmPassword, username } = req.body;
-    if (
-      email.trim() === "" ||
-      password.trim() === "" ||
-      confirmPassword.trim() === "" ||
-      username.trim() === ""
-    ) {
+    if (!email) {
       return res.status(400).send({
-        message: "email or password or confirmPassword or username is required",
+        message: "email is required",
+      });
+    }
+
+    if (!password) {
+      return res.status(400).send({
+        message: "password is required",
+      });
+    }
+    if (!username) {
+      return res.status(400).send({
+        message: "username is required",
       });
     }
 
     if (password.trim() != confirmPassword.trim()) {
       return res.status(400).send({ message: "password don't match" });
     }
-    let hashedPassword;
-    hashedPassword = await bcrypt.hash(password, 12);
-    password = hashedPassword
+    const hashedPassword = await bcrypt.hash(password, 12);
     client.query(
       `SELECT email, username FROM customers WHERE email = ? OR username = ?`,
       [email, username],
@@ -93,7 +97,7 @@ exports.register = async (req, res, next) => {
         } else {
           client.query(
             `INSERT INTO customers (username,email, password) VALUES (?,?,?)`,
-            [username, email, password],
+            [username, email, hashedPassword],
             function (err, results, fields) {
               return res.status(200).json({ message: "Register Successfully" });
             }
