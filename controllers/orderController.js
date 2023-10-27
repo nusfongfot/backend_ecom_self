@@ -78,9 +78,8 @@ exports.createOrder = async (req, res, next) => {
 
     client.query(
       `INSERT INTO orders (cus_id, pro_id, add_id,items) VALUES (?,?,?,?)`,
-      [cus_id, pro_id, add_id],
+      [cus_id, pro_id, add_id, items],
       function (err, results, fieldsDb) {
-        console.log(err)
         if (!!results) {
           return res.status(200).json({ message: "Create order successfully" });
         } else {
