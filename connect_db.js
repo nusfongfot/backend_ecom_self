@@ -5,12 +5,6 @@ const mysql = require("mysql2");
 //   database: "nus",
 // });
 
-// const client = mysql.createConnection({
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER,
-//   database: process.env.DB_PASS,
-// });
-
 const client = mysql.createConnection(process.env.DATABASE_URL)
 
 
