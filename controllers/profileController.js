@@ -2,6 +2,7 @@ const fs = require("fs");
 const client = require("../connect_db");
 const UploadServices = require("../services/uploadServices");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.getAllProfile = async (req, res, next) => {
   try {
@@ -12,7 +13,7 @@ exports.getAllProfile = async (req, res, next) => {
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         const total = results.length;
-        res.status(200).json({ total, results });
+        return res.status(200).json({ total, results });
       }
     );
   } catch (error) {
@@ -29,9 +30,9 @@ exports.getProfileById = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
-          res.status(200).json({ message: "successfully", results });
+          return res.status(200).json({ message: "successfully", results });
         } else {
-          res.status(404).json({ message: "user not found" });
+          return res.status(404).json({ message: "user not found" });
         }
       }
     );
@@ -51,11 +52,11 @@ exports.updateProfileByID = async (req, res, next) => {
     if (req.file) {
       secureUrl = await UploadServices.upload(req.file.path);
       client.query(
-        `UPDATE customers SET photo_user = ? WHERE cus_id = ?`,
+        `UPDATE customers SET photo_user = ? WHERE cus_id = ? AND deleted = 0`,
         [secureUrl, id],
         function (err, results, fields) {
           if (results.affectedRows == 0) {
-            return res.status(400).json({ message: "user not found" });
+            return res.status(400).json({ message: "User not found" });
           }
           client.query(
             `SELECT *,NULL AS password FROM customers WHERE cus_id = ?`,
@@ -94,12 +95,12 @@ exports.updateProfileByID = async (req, res, next) => {
     const updateQuery = `
     UPDATE customers
     SET name = ?, surname = ?, phone = ?, password = ?, username = ?
-    WHERE cus_id = ?
+    WHERE cus_id = ? AND deleted = 0
   `;
     const values = [name, surname, phone, hashedPassword, username, id];
     client.query(updateQuery, values, function (err, results, fields) {
       if (results.affectedRows == 0) {
-        return res.status(400).json({ message: "user not found" });
+        return res.status(400).json({ message: "User not found" });
       }
       client.query(
         `SELECT *,NULL AS password FROM customers WHERE cus_id = ?`,
@@ -124,12 +125,20 @@ exports.updateProfileByID = async (req, res, next) => {
 
 exports.deleteProfileByID = async (req, res, next) => {
   try {
+    const { authorization } = req.headers;
     const id = parseInt(req.params.id);
+
+    const token = authorization.split(" ")[1];
+    const privateKey = process.env.JSONWEB_SECRET;
+    const payload = jwt.verify(token, privateKey);
+    //find user
+    const userId = payload.userId.email;
     client.query(
-      "SELECT cus_id FROM customers WHERE cus_id = ?",
-      [id],
+      "SELECT email,cus_id FROM customers WHERE email = ?",
+      [userId],
       function (err, results, fields) {
-        if (results.length > 0) {
+        const cusID = results[0]?.cus_id;
+        if (results.length > 0 && cusID == id) {
           client.query(
             "UPDATE customers SET deleted = 1 WHERE cus_id = ?",
             [id],
@@ -138,8 +147,30 @@ exports.deleteProfileByID = async (req, res, next) => {
             }
           );
         } else {
-          return res.status(400).json({ message: "can not delete" });
+          return res
+            .status(400)
+            .json({ message: "Can not delete other person" });
         }
+      }
+    );
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+};
+
+exports.searchProfileUsers = async (req, res, next) => {
+  try {
+    const { limit, offSet, q } = req.query;
+    const queryParam = "%" + q + "%";
+
+    client.query(
+      "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at FROM customers WHERE name LIKE ? AND deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      [queryParam.toLowerCase(), parseInt(limit), parseInt(offSet)],
+      function (err, results, fields) {
+        console.log(q);
+        const total = results.length;
+        return res.status(200).json({ total, results });
       }
     );
   } catch (error) {

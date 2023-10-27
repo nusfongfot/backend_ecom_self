@@ -26,13 +26,13 @@ exports.login = async (req, res, next) => {
       `SELECT email,password FROM customers WHERE email = ?`,
       [email],
       async function (err, results, fields) {
-        const findEmail = results.length > 0;
+        const findEmail = results?.length > 0;
         if (!findEmail) {
           return res
             .status(404)
             .json({ message: "email or password is not correct" });
         }
-        const hashedPassword = results[0].password;
+        const hashedPassword = results[0]?.password;
         const isCorrect = await bcrypt.compare(password, hashedPassword);
         if (!isCorrect) {
           return res
@@ -84,8 +84,8 @@ exports.register = async (req, res, next) => {
       `SELECT email, username FROM customers WHERE email = ? OR username = ?`,
       [email, username],
       function (err, results, fields) {
-        const findEmail = results.filter((item) => item.email == email);
-        if (findEmail.length > 0) {
+        const findEmail = results?.filter((item) => item.email == email);
+        if (findEmail?.length > 0) {
           return res
             .status(400)
             .json({ message: "This email or username already exists" });

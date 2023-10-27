@@ -10,19 +10,19 @@ exports.getAllProduct = async (req, res, next) => {
     client.query(
       `SELECT p.stock, ord.items, ord.pro_id FROM products p INNER JOIN orders ord ON p.pro_id = ord.pro_id WHERE ord.status_order = "Successful delivery"`,
       async function (err, results, fields) {
-        const products = results.reduce((acc, val) => {
+        const products = results?.reduce((acc, val) => {
           const total = val.stock - val.items;
           acc.push({ pro_id: val.pro_id, stock: total });
           return acc;
         }, []);
-        const pro_id = products.map((item) => item.pro_id);
+        const pro_id = products?.map((item) => item.pro_id);
 
         client.query(
           "SELECT * FROM products WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
           [parseInt(limit), parseInt(offSet)],
           function (err, results, fields) {
-            const newStock = products.map((item) => item.stock);
-            const data = results.map((item, index) => {
+            const newStock = products?.map((item) => item.stock);
+            const data = results?.map((item, index) => {
               const productIndex = pro_id.indexOf(item.pro_id);
               if (pro_id.includes(item.pro_id)) {
                 return {
@@ -32,7 +32,7 @@ exports.getAllProduct = async (req, res, next) => {
               }
               return item;
             });
-            const total = results.length;
+            const total = results?.length;
             return res.status(200).json({ total, data });
           }
         );
@@ -151,74 +151,6 @@ exports.updateProductByID = async (req, res, next) => {
     console.log(error);
   }
 };
-
-// exports.updateProductByID = async (req, res, next) => {
-//   try {
-//     const id = parseInt(req.params.id);
-//     const form = new formidable.IncomingForm();
-//     form.parse(req, async (err, fields, files) => {
-//       if (err) return res.send({ message: err.message });
-
-//       for (const key in fields) {
-//         fields[key] = fields[key][0];
-//       }
-
-//       if (!fields.title.trim()) {
-//         return res.status(400).json({ message: "title is required!" });
-//       }
-//       if (!fields.description.trim()) {
-//         return res.status(400).json({ message: "description is required!" });
-//       }
-//       if (!fields.stock) {
-//         return res.status(400).json({ message: "stock is required!" });
-//       }
-//       if (!fields.price) {
-//         return res.status(400).json({ message: "price is required!" });
-//       }
-//       if (!fields.category.trim()) {
-//         return res.status(400).json({ message: "category is required!" });
-//       }
-//       if (!fields.brand.trim()) {
-//         return res.status(400).json({ message: "brand is required!" });
-//       }
-
-//       client.query(
-//         `SELECT pro_id FROM products WHERE pro_id = ? AND deleted = 0`,
-//         [id],
-//         function (err, results, fieldsDb) {
-//           console.log(results);
-//           if (results.length > 0) {
-//             client.query(
-//               `UPDATE products SET title = ?,description = ?,stock = ?,price = ?,category = ?,brand = ?
-//               WHERE pro_id = ?`,
-//               [
-//                 fields.title,
-//                 fields.description,
-//                 fields.stock,
-//                 fields.price,
-//                 fields.category,
-//                 fields.brand,
-//                 id,
-//               ],
-//               function (err, fields, fieldsDb) {
-//                 if (fields.affectedRows) {
-//                   return res
-//                     .status(200)
-//                     .json({ message: "Update product successfully" });
-//                 }
-//               }
-//             );
-//           } else {
-//             return res.status(400).json({ message: "product not found" });
-//           }
-//         }
-//       );
-//     });
-//   } catch (error) {
-//     next(error);
-//     console.log(error);
-//   }
-// };
 
 exports.createProduct = async (req, res, next) => {
   try {

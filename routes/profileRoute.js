@@ -5,6 +5,7 @@ const uploadMiddleware = require("../middleware/upload");
 const router = express.Router();
 
 router.get("/profile", profileController.getAllProfile);
+router.get("/profile/search", profileController.searchProfileUsers);
 router.get("/profile/:id", profileController.getProfileById);
 router.put(
   "/profile/:id",

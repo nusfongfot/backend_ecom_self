@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
     //find user
     const userId = payload.userId;
     client.query(
-      `SELECT email FROM customers WHERE email = ?`,
+      `SELECT email,role FROM customers WHERE email = ?`,
       [userId.email],
       function (err, results, fields) {
         if (results.length == 0) {

@@ -15,12 +15,21 @@ exports.createComment = (req, res, next) => {
     if (!pro_id) {
       return res.status(400).json({ message: "pro_id is required!" });
     }
-
     client.query(
-      `INSERT INTO comments (cus_id,star,details,pro_id) VALUES (?,?,?,?)`,
-      [cus_id, star, details, pro_id],
+      `SELECT cus_id, pro_id FROM comments WHERE cus_id = ?`,
+      [cus_id],
       function (err, results, fieldsDb) {
-        return res.status(200).json({ message: "Comment successfully" });
+        if (results.length > 0) {
+          return res.status(400).json({ message: "You alredy review!" });
+        } else {
+          client.query(
+            `INSERT INTO comments (cus_id,star,details,pro_id) VALUES (?,?,?,?)`,
+            [cus_id, star, details, pro_id],
+            function (err, results, fieldsDb) {
+              return res.status(200).json({ message: "Review successfully" });
+            }
+          );
+        }
       }
     );
   } catch (error) {
