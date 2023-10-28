@@ -37,7 +37,10 @@ exports.login = async (req, res, next) => {
         if (!isCorrect) {
           return res
             .status(401)
-            .json({ message: "email or password is not correct" });
+            .json({
+              res_code: "1500",
+              message: "email or password is not correct",
+            });
         }
         const user = results[0];
         const paylod = { userId: user };
@@ -48,14 +51,12 @@ exports.login = async (req, res, next) => {
           [email],
           function (err, results, fields) {
             const user = results[0];
-            return res
-              .status(200)
-              .json({
-                res_code: "0000",
-                message: "Login successfully",
-                token,
-                user,
-              });
+            return res.status(200).json({
+              res_code: "0000",
+              message: "Login successfully",
+              token,
+              user,
+            });
           }
         );
       }
@@ -110,7 +111,9 @@ exports.register = async (req, res, next) => {
                   .status(200)
                   .json({ res_code: "0000", message: "Register Successfully" });
               } else {
-                return res.status(400).json({ message: "Can not register" });
+                return res
+                  .status(400)
+                  .json({ res_code: "1500", message: "Can not register" });
               }
             }
           );
