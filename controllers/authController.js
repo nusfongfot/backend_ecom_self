@@ -1,10 +1,10 @@
 const bcrypt = require("bcrypt");
 const validator = require("validator");
-const jwt = require("jsonwebtoken");
+const jwt = require("sendwebtoken");
 const client = require("../connect_db");
 
 const genToken = (payload) => {
-  const privateKey = process.env.JSONWEB_SECRET;
+  const privateKey = process.env.sendWEB_SECRET;
   const options = { expiresIn: "1d" };
   const token = jwt.sign(payload, privateKey, options);
   return token;
@@ -30,14 +30,14 @@ exports.login = async (req, res, next) => {
         if (!findEmail) {
           return res
             .status(404)
-            .json({ message: "email or password is not correct" });
+            .send({ message: "email or password is not correct" });
         }
         const hashedPassword = results[0]?.password;
         const isCorrect = await bcrypt.compare(password, hashedPassword);
         if (!isCorrect) {
           return res
             .status(401)
-            .json({
+            .send({
               res_code: "1500",
               message: "email or password is not correct",
             });
@@ -51,7 +51,7 @@ exports.login = async (req, res, next) => {
           [email],
           function (err, results, fields) {
             const user = results[0];
-            return res.status(200).json({
+            return res.status(200).send({
               res_code: "0000",
               message: "Login successfully",
               token,
@@ -99,7 +99,7 @@ exports.register = async (req, res, next) => {
         if (findEmail?.length > 0) {
           return res
             .status(400)
-            .json({ message: "This email or username already exists" });
+            .send({ message: "This email or username already exists" });
         } else {
           client.query(
             `INSERT INTO customers (username,email, password) VALUES (?,?,?)`,
@@ -109,11 +109,11 @@ exports.register = async (req, res, next) => {
               if (!!results) {
                 return res
                   .status(200)
-                  .json({ res_code: "0000", message: "Register Successfully" });
+                  .send({ res_code: "0000", message: "Register Successfully" });
               } else {
                 return res
                   .status(400)
-                  .json({ res_code: "1500", message: "Can not register" });
+                  .send({ res_code: "1500", message: "Can not register" });
               }
             }
           );
