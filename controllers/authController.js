@@ -103,7 +103,7 @@ exports.register = async (req, res, next) => {
               if (!!results) {
                 return res
                   .status(200)
-                  .json({ message: "Register Successfully" });
+                  .json({ res_code: "0000", message: "Register Successfully" });
               } else {
                 return res.status(400).json({ message: "Can not register" });
               }
