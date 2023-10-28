@@ -8,7 +8,7 @@ exports.getAllOrders = async (req, res, next) => {
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         const total = results?.length;
-        return res.status(200).json({ total, results });
+        return res.status(200).json({ res_code: "0000", total, results });
       }
     );
   } catch (error) {
@@ -26,7 +26,7 @@ exports.getOrderById = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
-          return res.status(200).json({ results });
+          return res.status(200).json({ res_code: "0000", results });
         } else {
           return res.status(404).json({ message: "order not found" });
         }
@@ -47,7 +47,7 @@ exports.getHistoryOrderID = async (req, res, next) => {
       function (err, results, fields) {
         const total = results.length;
         if (results.length > 0) {
-          return res.status(200).json({ total, results });
+          return res.status(200).json({ res_code: "0000", total, results });
         } else {
           return res.status(404).json({ message: "order not found" });
         }
@@ -81,7 +81,9 @@ exports.createOrder = async (req, res, next) => {
       [cus_id, pro_id, add_id, items],
       function (err, results, fieldsDb) {
         if (!!results) {
-          return res.status(200).json({ message: "Create order successfully" });
+          return res
+            .status(200)
+            .json({ res_code: "0000", message: "Create order successfully" });
         } else {
           return res.status(400).json({ message: "Can not create order" });
         }
@@ -107,7 +109,9 @@ exports.cancelOrderById = async (req, res, next) => {
              WHERE order_id = ?`,
             [id]
           );
-          return res.status(200).json({ message: "Cancel order successfully" });
+          return res
+            .status(200)
+            .json({ res_code: "0000", message: "Cancel order successfully" });
         } else {
           return res.status(400).json({ message: "Can not cancel this order" });
         }
@@ -135,7 +139,7 @@ exports.changeStatusOrderById = async (req, res, next) => {
           );
           return res
             .status(200)
-            .json({ message: "Change status successfully" });
+            .json({ res_code: "0000", message: "Change status successfully" });
         } else {
           return res.status(400).json({ message: "Can not change status" });
         }

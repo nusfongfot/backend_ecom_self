@@ -46,7 +46,12 @@ exports.login = async (req, res, next) => {
             const admin = results[0];
             return res
               .status(200)
-              .json({ message: "Login successfully", token, admin });
+              .json({
+                res_code: "0000",
+                message: "Login successfully",
+                token,
+                admin,
+              });
           }
         );
       }
@@ -97,7 +102,10 @@ exports.register = async (req, res, next) => {
             function (err, results, fields) {
               return res
                 .status(200)
-                .json({ message: "Create admin Successfully" });
+                .json({
+                  res_code: "0000",
+                  message: "Create admin Successfully",
+                });
             }
           );
         }
@@ -121,7 +129,9 @@ exports.deleteAdminById = async (req, res, next) => {
             "UPDATE admin SET deleted = 1 WHERE admin_id = ?",
             [id],
             function (err, results, fields) {
-              return res.status(200).json({ message: "Delete successfully" });
+              return res
+                .status(200)
+                .json({ res_code: "0000", message: "Delete successfully" });
             }
           );
         } else {
@@ -143,7 +153,7 @@ exports.getAllAdmins = async (req, res, next) => {
         const total = results.length;
         return res
           .status(200)
-          .json({ message: "successfully", total, results });
+          .json({ res_code: "0000", message: "successfully", total, results });
       }
     );
   } catch (error) {

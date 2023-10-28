@@ -13,7 +13,7 @@ exports.getAllProfile = async (req, res, next) => {
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         const total = results.length;
-        return res.status(200).json({ total, results });
+        return res.status(200).json({ res_code: "0000", total, results });
       }
     );
   } catch (error) {
@@ -30,7 +30,9 @@ exports.getProfileById = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
-          return res.status(200).json({ message: "successfully", results });
+          return res
+            .status(200)
+            .json({ res_code: "0000", message: "successfully", results });
         } else {
           return res.status(404).json({ message: "user not found" });
         }
@@ -62,9 +64,11 @@ exports.updateProfileByID = async (req, res, next) => {
             `SELECT *,NULL AS password FROM customers WHERE cus_id = ?`,
             [id],
             function (err, results, fields) {
-              return res
-                .status(200)
-                .json({ message: "Update successfully", results });
+              return res.status(200).json({
+                res_code: "0000",
+                message: "Update successfully",
+                results,
+              });
             }
           );
         }
@@ -106,9 +110,11 @@ exports.updateProfileByID = async (req, res, next) => {
         `SELECT *,NULL AS password FROM customers WHERE cus_id = ?`,
         [id],
         function (err, results, fields) {
-          return res
-            .status(200)
-            .json({ message: "Update successfully", results });
+          return res.status(200).json({
+            res_code: "0000",
+            message: "Update successfully",
+            results,
+          });
         }
       );
     });
@@ -143,7 +149,9 @@ exports.deleteProfileByID = async (req, res, next) => {
             "UPDATE customers SET deleted = 1 WHERE cus_id = ?",
             [id],
             function (err, resultsDe, fields) {
-              return res.status(200).json({ message: "Delete successfully" });
+              return res
+                .status(200)
+                .json({ res_code: "0000", message: "Delete successfully" });
             }
           );
         } else {
@@ -170,7 +178,7 @@ exports.searchProfileUsers = async (req, res, next) => {
       function (err, results, fields) {
         console.log(q);
         const total = results.length;
-        return res.status(200).json({ total, results });
+        return res.status(200).json({ res_code: "0000", total, results });
       }
     );
   } catch (error) {

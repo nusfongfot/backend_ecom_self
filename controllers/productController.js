@@ -33,7 +33,7 @@ exports.getAllProduct = async (req, res, next) => {
               return item;
             });
             const total = results?.length;
-            return res.status(200).json({ total, data });
+            return res.status(200).json({ res_code: "0000", total, data });
           }
         );
       }
@@ -52,7 +52,9 @@ exports.getProductByID = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
-          res.status(200).json({ message: "successfully", results });
+          res
+            .status(200)
+            .json({ res_code: "0000", message: "successfully", results });
         } else {
           res.status(404).json({ message: "product not found" });
         }
@@ -73,7 +75,7 @@ exports.getProductByCate = async (req, res, next) => {
       [cate, parseInt(limit), parseInt(offSet)],
       (err, results) => {
         const total = results?.length;
-        return res.status(200).json({ total, results });
+        return res.status(200).json({ res_code: "0000", total, results });
       }
     );
   } catch (error) {
@@ -92,7 +94,7 @@ exports.getProductBySearch = async (req, res, next) => {
       [queryParam.toLowerCase(), parseInt(limit), parseInt(offSet)],
       (err, results) => {
         const total = results?.length;
-        return res.status(200).json({ total, results });
+        return res.status(200).json({ res_code: "0000", total, results });
       }
     );
   } catch (error) {
@@ -136,9 +138,10 @@ exports.updateProductByID = async (req, res, next) => {
             WHERE pro_id = ?`,
             [title, description, stock, price, category, brand, id],
             function (err, fields, fieldsDb) {
-              return res
-                .status(200)
-                .json({ message: "Update product successfully" });
+              return res.status(200).json({
+                res_code: "0000",
+                message: "Update product successfully",
+              });
             }
           );
         } else {
@@ -215,9 +218,11 @@ exports.createProduct = async (req, res, next) => {
           fields.image,
         ],
         function (err, results, fieldsDb) {
-          return res
-            .status(200)
-            .json({ message: "Create product successfully", fields });
+          return res.status(200).json({
+            res_code: "0000",
+            message: "Create product successfully",
+            fields,
+          });
         }
       );
     });
@@ -243,7 +248,9 @@ exports.deleteProductByID = async (req, res, next) => {
             "UPDATE products SET deleted = 1 WHERE pro_id = ?",
             [id],
             function (err, results, fields) {
-              return res.status(200).json({ message: "Delete successfully" });
+              return res
+                .status(200)
+                .json({ res_code: "0000", message: "Delete successfully" });
             }
           );
         } else {
@@ -261,7 +268,7 @@ exports.getCategories = async (req, res, next) => {
   try {
     const sqlQuery = `SELECT DISTINCT category FROM products`;
     client.query(sqlQuery, (err, results) => {
-      return res.status(200).json({ results });
+      return res.status(200).json({ res_code: "0000", results });
     });
   } catch (error) {
     next(error);

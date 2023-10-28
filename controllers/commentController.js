@@ -19,8 +19,8 @@ exports.createComment = (req, res, next) => {
       `SELECT cus_id, pro_id FROM comments WHERE cus_id = ?`,
       [cus_id],
       function (err, results, fieldsDb) {
-        const product = results?.some((item) => item.pro_id == pro_id)
-        console.log(product)
+        const product = results?.some((item) => item.pro_id == pro_id);
+        console.log(product);
         if (results.length > 0 && product) {
           return res.status(400).json({ message: "You alredy review!" });
         } else {
@@ -28,7 +28,9 @@ exports.createComment = (req, res, next) => {
             `INSERT INTO comments (cus_id,star,details,pro_id) VALUES (?,?,?,?)`,
             [cus_id, star, details, pro_id],
             function (err, results, fieldsDb) {
-              return res.status(200).json({ message: "Review successfully" });
+              return res
+                .status(200)
+                .json({ res_code: "0000", message: "Review successfully" });
             }
           );
         }
@@ -52,7 +54,7 @@ exports.getCommentByProductID = (req, res, next) => {
       [id],
       function (err, results, fieldsDb) {
         if (results?.length > 0) {
-          return res.status(200).json({ results });
+          return res.status(200).json({ res_code: "0000", results });
         } else {
           return res.status(400).json({ message: "Comment not found" });
         }

@@ -8,7 +8,7 @@ exports.getAddressById = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
-          return res.status(200).json({ results });
+          return res.status(200).json({ res_code: "0000", results });
         } else {
           return res.status(404).json({ message: "address not found" });
         }
@@ -59,7 +59,9 @@ exports.createAddress = async (req, res, next) => {
             [cus_id, home_no, amphoe, tambon, road, province, zipcode, detail],
             function (err, resultsCreate, fields) {
               if (!!resultsCreate) {
-                return res.status(200).json({ message: "Create successfully" });
+                return res
+                  .status(200)
+                  .json({ res_code: "0000", message: "Create successfully" });
               }
               return res.status(400).json({ message: "cannot duplicate" });
             }
@@ -85,7 +87,9 @@ exports.deleteAddress = async (req, res, next) => {
             "UPDATE address SET deleted = 1 WHERE add_id = ? AND deleted = 0",
             [id],
             function (err, results, fields) {
-              return res.status(200).json({ message: "Delete successfully" });
+              return res
+                .status(200)
+                .json({ res_code: "0000", message: "Delete successfully" });
             }
           );
         } else {
@@ -154,14 +158,15 @@ exports.updateAddress = async (req, res, next) => {
                   ],
                   function (err, resultsCreate, fields) {
                     if (!!resultsCreate) {
-                      return res
-                        .status(200)
-                        .json({ message: "Update successfully" });
+                      return res.status(200).json({
+                        res_code: "0000",
+                        message: "Update successfully",
+                      });
                     }
                   }
                 );
               } else {
-                return res.status(404).json({ message: "address not found" });
+                return res.status(404).json({ message: "Address not found" });
               }
             }
           );
@@ -179,7 +184,7 @@ exports.getProvinces = async (req, res, next) => {
     client.query(
       `SELECT DISTINCT province FROM tambons `,
       function (err, results, fieldsDb) {
-        return res.status(200).json({ results });
+        return res.status(200).json({ res_code: "0000", results });
       }
     );
   } catch (error) {
@@ -197,7 +202,7 @@ exports.getAmphoe = async (req, res, next) => {
         `,
       [province, amphoe],
       function (err, results, fieldsDb) {
-        return res.status(200).json({ results });
+        return res.status(200).json({ res_code: "0000", results });
       }
     );
   } catch (error) {
@@ -215,7 +220,7 @@ exports.getTambon = async (req, res, next) => {
           `,
       [province, amphoe],
       function (err, results, fieldsDb) {
-        return res.status(200).json({ results });
+        return res.status(200).json({ res_code: "0000", results });
       }
     );
   } catch (error) {
@@ -234,9 +239,11 @@ exports.getZipCode = async (req, res, next) => {
       [province, amphoe, tambon],
       function (err, results, fieldsDb) {
         if (results.length > 0) {
-          return res.status(200).json({ zipcode: results[0].zipcode });
+          return res
+            .status(200)
+            .json({ res_code: "0000", zipcode: results[0].zipcode });
         } else {
-          return res.status(400).json({ message: "not found" });
+          return res.status(400).json({ message: "Not found" });
         }
       }
     );

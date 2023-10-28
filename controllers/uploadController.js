@@ -8,7 +8,7 @@ exports.uploadSingleImage = async (req, res, next) => {
     if (req.file) {
       secureUrl = await UploadServices.upload(req.file.path);
     }
-    res.status(200).json({ secureUrl });
+    res.status(200).json({ res_code: "0000", secureUrl });
   } catch (error) {
     next(error);
     console.log(error);
@@ -33,9 +33,11 @@ exports.uploadMultipleImages = async (req, res, next) => {
       urls.push(newPath);
     }
 
-    return res
-      .status(200)
-      .json({ message: "Images uploaded successfully", data: urls });
+    return res.status(200).json({
+      res_code: "0000",
+      message: "Images uploaded successfully",
+      data: urls,
+    });
   } catch (error) {
     next(error);
     console.error("Error: ", error);
