@@ -50,7 +50,12 @@ exports.login = async (req, res, next) => {
             const user = results[0];
             return res
               .status(200)
-              .json({ message: "Login successfully", token, user });
+              .json({
+                res_code: "0000",
+                message: "Login successfully",
+                token,
+                user,
+              });
           }
         );
       }
