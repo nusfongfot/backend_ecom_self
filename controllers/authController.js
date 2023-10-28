@@ -63,7 +63,7 @@ exports.login = async (req, res, next) => {
     );
   } catch (error) {
     next(error);
-    console.log(error);
+    res.send({ message: error.message})
   }
 };
 
