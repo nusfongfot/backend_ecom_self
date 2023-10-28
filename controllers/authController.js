@@ -1,10 +1,10 @@
 const bcrypt = require("bcrypt");
 const validator = require("validator");
-const jwt = require("sendwebtoken");
+const jwt = require("jsonwebtoken");
 const client = require("../connect_db");
 
 const genToken = (payload) => {
-  const privateKey = process.env.sendWEB_SECRET;
+  const privateKey = process.env.JSONWEB_SECRET;
   const options = { expiresIn: "1d" };
   const token = jwt.sign(payload, privateKey, options);
   return token;
