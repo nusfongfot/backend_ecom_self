@@ -14,12 +14,11 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const isEmail = validator.isEmail(email);
-
     if (email.trim() === "" || password.trim() === "") {
-      return res.status(400).send({ message: "email or password is required" });
+      return res.status(400).json({ message: "email or password is required" });
     }
     if (!isEmail) {
-      return res.status(400).send({ message: "Invalid email address" });
+      return res.status(400).json({ message: "Invalid email address" });
     }
 
     client.query(
@@ -28,17 +27,15 @@ exports.login = async (req, res, next) => {
       async function (err, results, fields) {
         const findEmail = results?.length > 0;
         if (!findEmail) {
-          return res
-            // .status(404)
-            .send({
-              res_code: "1500",
-              message: "email or password is not correct",
-            });
+          return res.status(404).send({
+            res_code: "1500",
+            message: "Email or password is not correct",
+          });
         }
         const hashedPassword = results[0]?.password;
         const isCorrect = await bcrypt.compare(password, hashedPassword);
         if (!isCorrect) {
-          return res.send({
+          return res.status(400).send({
             res_code: "1500",
             message: "Email or password is not correct",
           });
@@ -52,7 +49,7 @@ exports.login = async (req, res, next) => {
           [email],
           function (err, results, fields) {
             const user = results[0];
-            return res.status(200).send({
+            return res.status(200).json({
               res_code: "0000",
               message: "Login successfully",
               token,
@@ -64,7 +61,7 @@ exports.login = async (req, res, next) => {
     );
   } catch (error) {
     next(error);
-    res.send({ message: error.message });
+    res.json({ message: error.message });
   }
 };
 
@@ -72,24 +69,24 @@ exports.register = async (req, res, next) => {
   try {
     const { email, password, confirmPassword, username } = req.body;
     if (!email.trim()) {
-      return res.status(400).send({
+      return res.status(400).json({
         message: "email is required",
       });
     }
 
     if (!password.trim()) {
-      return res.status(400).send({
+      return res.status(400).json({
         message: "password is required",
       });
     }
     if (!username.trim()) {
-      return res.status(400).send({
+      return res.status(400).json({
         message: "username is required",
       });
     }
 
     if (password.trim() != confirmPassword.trim()) {
-      return res.status(400).send({ message: "password don't match" });
+      return res.status(400).json({ message: "password don't match" });
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     client.query(
@@ -100,7 +97,7 @@ exports.register = async (req, res, next) => {
         if (findEmail?.length > 0) {
           return res
             .status(400)
-            .send({ message: "This email or username already exists" });
+            .json({ message: "This email or username already exists" });
         } else {
           client.query(
             `INSERT INTO customers (username,email, password) VALUES (?,?,?)`,
@@ -110,11 +107,11 @@ exports.register = async (req, res, next) => {
               if (!!results) {
                 return res
                   .status(200)
-                  .send({ res_code: "0000", message: "Register Successfully" });
+                  .json({ res_code: "0000", message: "Register Successfully" });
               } else {
                 return res
                   .status(400)
-                  .send({ res_code: "1500", message: "Can not register" });
+                  .json({ res_code: "1500", message: "Can not register" });
               }
             }
           );
