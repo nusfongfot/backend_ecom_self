@@ -36,10 +36,9 @@ exports.login = async (req, res, next) => {
         const isCorrect = await bcrypt.compare(password, hashedPassword);
         if (!isCorrect) {
           return res
-            .status(401)
             .send({
               res_code: "1500",
-              message: "email or password is not correct",
+              message: "Email or password is not correct",
             });
         }
         const user = results[0];
