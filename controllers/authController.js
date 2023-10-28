@@ -29,17 +29,19 @@ exports.login = async (req, res, next) => {
         const findEmail = results?.length > 0;
         if (!findEmail) {
           return res
-            .status(404)
-            .send({ message: "email or password is not correct" });
+            // .status(404)
+            .send({
+              res_code: "1500",
+              message: "email or password is not correct",
+            });
         }
         const hashedPassword = results[0]?.password;
         const isCorrect = await bcrypt.compare(password, hashedPassword);
         if (!isCorrect) {
-          return res
-            .send({
-              res_code: "1500",
-              message: "Email or password is not correct",
-            });
+          return res.send({
+            res_code: "1500",
+            message: "Email or password is not correct",
+          });
         }
         const user = results[0];
         const paylod = { userId: user };
@@ -62,7 +64,7 @@ exports.login = async (req, res, next) => {
     );
   } catch (error) {
     next(error);
-    res.send({ message: error.message})
+    res.send({ message: error.message });
   }
 };
 
