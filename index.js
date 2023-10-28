@@ -20,7 +20,7 @@ const authenticate = require("./middleware/authenticate");
 // Allow,Parser
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1", commentRoute);
