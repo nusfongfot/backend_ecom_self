@@ -94,7 +94,8 @@ exports.register = async (req, res, next) => {
       [email, username],
       function (err, results, fields) {
         const findEmail = results?.filter((item) => item.email == email);
-        if (findEmail?.length > 0) {
+        const findUsername = results?.filter((item) => item.username == username);
+        if (findEmail?.length > 0 || findUsername?.length > 0) {
           return res
             .status(400)
             .json({ message: "This email or username already exists" });
