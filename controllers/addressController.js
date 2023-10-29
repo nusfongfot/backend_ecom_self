@@ -40,12 +40,14 @@ exports.getSelectedAddress = async (req, res, next) => {
 
 exports.updatedSelectedAddress = async (req, res, next) => {
   try {
-    const {  isFirst } = req.body;
-    const id = parseInt(req.params.id)
+    const { isFirst, cus_id } = req.body;
+    const id = parseInt(req.params.id);
 
-  
     if (!isFirst) {
       return res.status(400).json({ message: "isFirst is required!" });
+    }
+    if (!cus_id) {
+      return res.status(400).json({ message: "cus_id is required!" });
     }
 
     client.query(
@@ -54,10 +56,12 @@ exports.updatedSelectedAddress = async (req, res, next) => {
       function (err, results, fields) {
         if (results.length > 0) {
           client.query(
-            `UPDATE address SET isFirst = ? WHERE add_id = ? AND deleted = 0`,
-            [isFirst, id],
+            `UPDATE address SET isFirst = ? WHERE add_id = ? AND deleted = 0 AND cus_id = ?`,
+            [isFirst, id, cus_id],
             function (err, results, fields) {
-              return res.status(200).json({ res_code: "0000",  message: "Updated successfully" });
+              return res
+                .status(200)
+                .json({ res_code: "0000", message: "Updated successfully" });
             }
           );
         } else {
