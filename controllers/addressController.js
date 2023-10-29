@@ -51,8 +51,8 @@ exports.updatedSelectedAddress = async (req, res, next) => {
     }
 
     client.query(
-      `SELECT add_id FROM address WHERE add_id = ? AND deleted = 0`,
-      [id],
+      `SELECT add_id FROM address WHERE add_id = ? AND cus_id = ? AND deleted = 0`,
+      [id, cus_id],
       function (err, results, fields) {
         if (results.length > 0) {
           client.query(
