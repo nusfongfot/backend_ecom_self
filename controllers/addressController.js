@@ -7,10 +7,61 @@ exports.getAddressById = async (req, res, next) => {
       "SELECT *, NULL AS deleted FROM address WHERE cus_id = ? AND deleted = 0",
       [id],
       function (err, results, fields) {
+        const total = results?.length;
         if (results.length > 0) {
-          return res.status(200).json({ res_code: "0000", results });
+          return res.status(200).json({ res_code: "0000", total, results });
         } else {
           return res.status(404).json({ message: "address not found" });
+        }
+      }
+    );
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+};
+
+exports.getSelectedAddress = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    client.query(
+      `SELECT *, NULL AS deleted FROM address WHERE cus_id = ? AND deleted = 0 AND isFirst = "true"`,
+      [id],
+      function (err, results, fields) {
+        const total = results?.length;
+        return res.status(200).json({ res_code: "0000", total, results });
+      }
+    );
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+};
+
+exports.updatedSelectedAddress = async (req, res, next) => {
+  try {
+    const {  isFirst } = req.body;
+    const id = parseInt(req.params.id)
+
+  
+    if (!isFirst) {
+      return res.status(400).json({ message: "isFirst is required!" });
+    }
+
+    client.query(
+      `SELECT add_id FROM address WHERE add_id = ? AND deleted = 0`,
+      [id],
+      function (err, results, fields) {
+        if (results.length > 0) {
+          client.query(
+            `UPDATE address SET isFirst = ? WHERE add_id = ? AND deleted = 0`,
+            [isFirst, id],
+            function (err, results, fields) {
+              return res.status(200).json({ res_code: "0000",  message: "Updated successfully" });
+            }
+          );
+        } else {
+          return res.status(404).json({ message: "Address not found" });
         }
       }
     );
