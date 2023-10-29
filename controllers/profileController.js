@@ -9,7 +9,7 @@ exports.getAllProfile = async (req, res, next) => {
     const { limit, offSet } = req.query;
 
     client.query(
-      "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at FROM customers WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at,role FROM customers WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         const total = results.length;
@@ -26,7 +26,7 @@ exports.getProfileById = async (req, res, next) => {
   try {
     const id = req.params.id;
     client.query(
-      "SELECT cus_id,name,surname,phone,email,username,photo_user FROM customers WHERE cus_id = ? AND deleted = 0",
+      "SELECT cus_id,name,surname,phone,email,username,photo_user,role FROM customers WHERE cus_id = ? AND deleted = 0",
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
@@ -173,7 +173,7 @@ exports.searchProfileUsers = async (req, res, next) => {
     const queryParam = "%" + q + "%";
 
     client.query(
-      "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at FROM customers WHERE name LIKE ? AND deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at,role FROM customers WHERE name LIKE ? AND deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
       [queryParam.toLowerCase(), parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         console.log(q);
