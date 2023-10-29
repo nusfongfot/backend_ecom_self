@@ -163,12 +163,10 @@ exports.deleteAddress = async (req, res, next) => {
                   "UPDATE address SET deleted = 1 WHERE add_id = ? AND deleted = 0",
                   [add_id],
                   function (err, results, fields) {
-                    return res
-                      .status(200)
-                      .json({
-                        res_code: "0000",
-                        message: "Delete successfully",
-                      });
+                    return res.status(200).json({
+                      res_code: "0000",
+                      message: "Delete successfully",
+                    });
                   }
                 );
               }
@@ -234,9 +232,8 @@ exports.updateAddress = async (req, res, next) => {
             function (err, resultsSelect, fields) {
               if (resultsSelect.length > 0) {
                 client.query(
-                  "UPDATE address SET add_id = ?, home_no = ?, amphoe = ?, tambon = ?, road = ?, province = ?, zipcode = ?, detail = ? WHERE add_id = ?",
+                  "UPDATE address SET  home_no = ?, amphoe = ?, tambon = ?, road = ?, province = ?, zipcode = ?, detail = ? WHERE add_id = ?",
                   [
-                    add_id,
                     home_no,
                     amphoe,
                     tambon,
@@ -244,7 +241,7 @@ exports.updateAddress = async (req, res, next) => {
                     province,
                     zipcode,
                     detail,
-                    id,
+                    add_id,
                   ],
                   function (err, resultsCreate, fields) {
                     if (!!resultsCreate) {
