@@ -1,4 +1,5 @@
 const client = require("../connect_db");
+const jwt = require("jsonwebtoken");
 
 exports.getAddressById = async (req, res, next) => {
   try {
@@ -133,22 +134,50 @@ exports.createAddress = async (req, res, next) => {
 exports.deleteAddress = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
+    const { authorization } = req.headers;
+    const { add_id } = req.body;
+
+    const token = authorization.split(" ")[1];
+    const privateKey = process.env.JSONWEB_SECRET;
+    const payload = jwt.verify(token, privateKey);
+    const userId = payload.userId.email;
+
+    if (!add_id) {
+      return res.status(400).json({ message: "add_id is required!" });
+    }
+
     client.query(
-      "SELECT add_id FROM address WHERE add_id = ?",
-      [id],
+      "SELECT email,cus_id FROM customers WHERE email = ?",
+      [userId],
       function (err, results, fields) {
-        if (results.length > 0) {
+        const cusId = results[0]?.cus_id;
+        if (cusId == id) {
           client.query(
-            "UPDATE address SET deleted = 1 WHERE add_id = ? AND deleted = 0",
-            [id],
+            "SELECT add_id FROM address WHERE add_id = ? AND cus_id = ?",
+            [add_id, cusId],
             function (err, results, fields) {
-              return res
-                .status(200)
-                .json({ res_code: "0000", message: "Delete successfully" });
+              if (results.length == 0) {
+                return res.status(404).json({ message: "Address not found" });
+              } else {
+                client.query(
+                  "UPDATE address SET deleted = 1 WHERE add_id = ? AND deleted = 0",
+                  [add_id],
+                  function (err, results, fields) {
+                    return res
+                      .status(200)
+                      .json({
+                        res_code: "0000",
+                        message: "Delete successfully",
+                      });
+                  }
+                );
+              }
             }
           );
         } else {
-          return res.status(400).json({ message: "can not delete" });
+          return res
+            .status(400)
+            .json({ message: "Can not delete address other person" });
         }
       }
     );
@@ -160,12 +189,17 @@ exports.deleteAddress = async (req, res, next) => {
 
 exports.updateAddress = async (req, res, next) => {
   try {
-    const { cus_id, home_no, amphoe, tambon, road, province, zipcode, detail } =
+    const { add_id, home_no, amphoe, tambon, road, province, zipcode, detail } =
       req.body;
     const id = parseInt(req.params.id);
+    const { authorization } = req.headers;
 
-    if (!cus_id) {
-      return res.status(400).json({ message: "cus_id is required!" });
+    const token = authorization.split(" ")[1];
+    const privateKey = process.env.JSONWEB_SECRET;
+    const payload = jwt.verify(token, privateKey);
+    const userId = payload.userId.email;
+    if (!add_id) {
+      return res.status(400).json({ message: "add_id is required!" });
     }
     if (!home_no) {
       return res.status(400).json({ message: "home_no is required!" });
@@ -187,21 +221,22 @@ exports.updateAddress = async (req, res, next) => {
     }
 
     client.query(
-      "SELECT cus_id FROM customers WHERE cus_id = ?",
-      [cus_id],
+      "SELECT email,cus_id FROM customers WHERE email = ?",
+      [userId],
       function (err, results, fields) {
-        if (results.length == 0) {
-          return res.status(404).json({ message: "user not found" });
+        const cusID = results[0]?.cus_id;
+        if (cusID !== id) {
+          return res.status(400).json({ message: "Can not edit other person" });
         } else {
           client.query(
-            "SELECT add_id FROM address WHERE add_id = ? AND deleted = 0",
-            [id],
+            "SELECT add_id FROM address WHERE add_id = ? AND deleted = 0 AND cus_id = ?",
+            [add_id, id],
             function (err, resultsSelect, fields) {
               if (resultsSelect.length > 0) {
                 client.query(
-                  "UPDATE address SET cus_id = ?, home_no = ?, amphoe = ?, tambon = ?, road = ?, province = ?, zipcode = ?, detail = ? WHERE add_id = ?",
+                  "UPDATE address SET add_id = ?, home_no = ?, amphoe = ?, tambon = ?, road = ?, province = ?, zipcode = ?, detail = ? WHERE add_id = ?",
                   [
-                    cus_id,
+                    add_id,
                     home_no,
                     amphoe,
                     tambon,
