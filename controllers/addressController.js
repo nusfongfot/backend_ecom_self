@@ -41,32 +41,55 @@ exports.getSelectedAddress = async (req, res, next) => {
 
 exports.updatedSelectedAddress = async (req, res, next) => {
   try {
-    const { isFirst, cus_id } = req.body;
+    const { add_id } = req.body;
     const id = parseInt(req.params.id);
 
-    if (!isFirst) {
-      return res.status(400).json({ message: "isFirst is required!" });
-    }
-    if (!cus_id) {
-      return res.status(400).json({ message: "cus_id is required!" });
+    if (!add_id) {
+      return res.status(400).json({ message: "add_id is required!" });
     }
 
     client.query(
-      `SELECT add_id FROM address WHERE add_id = ? AND cus_id = ? AND deleted = 0`,
-      [id, cus_id],
+      `SELECT add_id, isFirst FROM address WHERE cus_id = ? AND deleted = 0`,
+      [id],
       function (err, results, fields) {
-        if (results.length > 0) {
+        const findisFirst = results.find((item) => item.isFirst === "true");
+
+        if (findisFirst) {
           client.query(
-            `UPDATE address SET isFirst = ? WHERE add_id = ? AND deleted = 0 AND cus_id = ?`,
-            [isFirst, id, cus_id],
-            function (err, results, fields) {
+            `UPDATE address SET isFirst = "false" WHERE cus_id = ? AND deleted = 0`,
+            [id],
+            function (err, resultsOne, fields) {
+              client.query(
+                `UPDATE address SET isFirst = "true" WHERE add_id = ? AND cus_id = ? AND deleted = 0`,
+                [add_id, id],
+                function (err, resultsTwo, fields) {
+                  if (resultsTwo.affectedRows === 0) {
+                    return res
+                      .status(404)
+                      .json({ message: "Address not found" });
+                  }
+
+                  return res.status(200).json({
+                    res_code: "0000",
+                    message: "Updated successfully",
+                  });
+                }
+              );
+            }
+          );
+        } else {
+          client.query(
+            `UPDATE address SET isFirst = "true" WHERE add_id = ? AND cus_id = ? AND deleted = 0`,
+            [add_id, id],
+            function (err, resultsTwo, fields) {
+              if (resultsTwo.affectedRows === 0) {
+                return res.status(404).json({ message: "Address not found" });
+              }
               return res
                 .status(200)
                 .json({ res_code: "0000", message: "Updated successfully" });
             }
           );
-        } else {
-          return res.status(404).json({ message: "Address not found" });
         }
       }
     );
