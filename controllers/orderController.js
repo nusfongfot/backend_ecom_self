@@ -4,7 +4,7 @@ exports.getAllOrders = async (req, res, next) => {
   try {
     const { limit, offSet } = req.query;
     client.query(
-      "SELECT ord.order_id,ord.created_at,ord.status_order,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id ORDER BY ord.created_at DESC",
+      "SELECT ord.order_id,ord.created_at,ord.status_order,ord.items,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id ORDER BY ord.created_at DESC",
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         const total = results?.length;
@@ -22,7 +22,7 @@ exports.getOrderById = async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     client.query(
-      "SELECT ord.order_id,ord.created_at,ord.status_order,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.order_id = ?  ORDER BY ord.created_at DESC",
+      "SELECT ord.order_id,ord.created_at,ord.status_order,ord.items,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.order_id = ?  ORDER BY ord.created_at DESC",
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
@@ -42,7 +42,7 @@ exports.getHistoryOrderID = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     client.query(
-      "SELECT ord.order_id,ord.cus_id,ord.created_at,ord.status_order,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.cus_id = ? ORDER BY ord.created_at DESC",
+      "SELECT ord.order_id,ord.cus_id,ord.created_at,ord.status_order,ord.items,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.cus_id = ? ORDER BY ord.created_at DESC",
       [id],
       function (err, results, fields) {
         const total = results.length;
