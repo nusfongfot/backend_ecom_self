@@ -87,19 +87,41 @@ exports.getProductByCate = async (req, res, next) => {
 exports.getProductBySearch = async (req, res, next) => {
   try {
     const { q, offSet, limit } = req.query;
-    const sqlQuery = `SELECT * FROM products WHERE title LIKE ? AND deleted = 0 LIMIT ? OFFSET ?`;
+
+    const sqlQuery = `
+      SELECT * FROM products 
+      WHERE LOWER(title) LIKE ? AND deleted = 0 
+      LIMIT ? OFFSET ?;
+    `;
+
     const queryParam = "%" + q + "%";
-    client.query(
-      sqlQuery,
-      [queryParam.toLowerCase(), parseInt(limit), parseInt(offSet)],
-      (err, results) => {
-        const total = results?.length;
-        return res.status(200).json({ res_code: "0000", total, results });
-      }
-    );
+    const queryLimit = parseInt(limit);
+    const queryOffset = parseInt(offSet);
+
+    // Execute the query using a promise-based approach
+    const results = await new Promise((resolve, reject) => {
+      client.query(
+        sqlQuery,
+        [queryParam.toLocaleLowerCase(), queryLimit, queryOffset],
+        (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        }
+      );
+    });
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Product not found!" });
+    } else {
+      const total = results.length;
+      return res.status(200).json({ res_code: "0000", total, results });
+    }
   } catch (error) {
     next(error);
-    console.log(error);
+    console.error(error);
   }
 };
 
