@@ -288,10 +288,31 @@ exports.deleteProductByID = async (req, res, next) => {
 
 exports.getCategories = async (req, res, next) => {
   try {
-    const sqlQuery = `SELECT DISTINCT category FROM products`;
-    client.query(sqlQuery, (err, results) => {
-      return res.status(200).json({ res_code: "0000", results });
-    });
+    const categories = [
+      "smartphones",
+      "laptops",
+      "fragrances",
+      "skincare",
+      "home-decoration",
+      "furniture",
+      "tops",
+      "womens-dresses",
+      "womens-shoes",
+      "mens-shirts",
+      "mens-shoes",
+      "mens-watches",
+      "womens-watches",
+      "womens-bags",
+      "womens-jewellery",
+      "sunglasses",
+      "lighting",
+      "other",
+    ];
+    return res.status(200).json({ res_code: "0000", categories });
+    // const sqlQuery = `SELECT DISTINCT category FROM products`;
+    // client.query(sqlQuery, (err, results) => {
+    //   return res.status(200).json({ res_code: "0000", results });
+    // });
   } catch (error) {
     next(error);
     console.log(error);
