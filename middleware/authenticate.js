@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
       `SELECT email,role FROM customers WHERE email = ?`,
       [userId.email],
       function (err, results, fields) {
-        if (results.length == 0) {
+        if (results?.length == 0) {
           return res.status(401).json({ message: "unauthenticated" });
         }
       }
