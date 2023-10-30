@@ -3,12 +3,22 @@ const client = require("../connect_db");
 exports.getAllOrders = async (req, res, next) => {
   try {
     const { limit, offSet } = req.query;
+
     client.query(
       `SELECT ord.order_id,ord.created_at,ord.status_order,ord.items,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.status_order != "Cancel order" ORDER BY ord.created_at DESC`,
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
         const total = results?.length;
-        return res.status(200).json({ res_code: "0000", total, results });
+        const calPrice = results?.reduce((acc, val) => {
+          const price = parseFloat(val.price);
+          const items = parseFloat(val.items);
+          const total = price * items;
+          return acc + total;
+        }, 0);
+        const total_price = calPrice.toLocaleString("en-US");
+        return res
+          .status(200)
+          .json({ res_code: "0000", total_price, total, results });
       }
     );
   } catch (error) {
@@ -22,13 +32,22 @@ exports.getOrderById = async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     client.query(
-      "SELECT ord.order_id,ord.created_at,ord.status_order,ord.items,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.order_id = ?  ORDER BY ord.created_at DESC",
+      `SELECT ord.order_id,ord.created_at,ord.status_order,ord.items,c.name,c.surname,c.phone ,p.title,p.description,p.price,p.image ,ad.home_no,ad.amphoe,ad.tambon,ad.road,ad.province,ad.zipcode,ad.detail,ad.isFirst FROM orders ord INNER JOIN customers c ON ord.cus_id = c.cus_id INNER JOIN products p ON ord.pro_id = p.pro_id INNER JOIN address ad ON ord.add_id = ad.add_id WHERE ord.order_id = ? AND ord.status_order != "Cancel order" ORDER BY ord.created_at DESC`,
       [id],
       function (err, results, fields) {
+        const calPrice = results?.reduce((acc, val) => {
+          const price = parseFloat(val.price);
+          const items = parseFloat(val.items);
+          const total = price * items;
+          return acc + total;
+        }, 0);
+        const total_price = calPrice.toLocaleString("en-US");
         if (results.length > 0) {
-          return res.status(200).json({ res_code: "0000", results });
+          return res
+            .status(200)
+            .json({ res_code: "0000", total_price, results });
         } else {
-          return res.status(404).json({ message: "order not found" });
+          return res.status(404).json({ message: "Order not found" });
         }
       }
     );
@@ -46,8 +65,17 @@ exports.getHistoryOrderID = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         const total = results.length;
+        const calPrice = results?.reduce((acc, val) => {
+          const price = parseFloat(val.price);
+          const items = parseFloat(val.items);
+          const total = price * items;
+          return acc + total;
+        }, 0);
+        const total_price = calPrice.toLocaleString("en-US");
         if (results.length > 0) {
-          return res.status(200).json({ res_code: "0000", total, results });
+          return res
+            .status(200)
+            .json({ res_code: "0000", total_price, total, results });
         } else {
           return res.status(404).json({ message: "order not found" });
         }
@@ -89,12 +117,10 @@ exports.createOrder = async (req, res, next) => {
             [cus_id, pro_id, add_id, items],
             function (err, results, fieldsDb) {
               if (!!results) {
-                return res
-                  .status(200)
-                  .json({
-                    res_code: "0000",
-                    message: "Create order successfully",
-                  });
+                return res.status(200).json({
+                  res_code: "0000",
+                  message: "Create order successfully",
+                });
               } else {
                 return res
                   .status(400)
