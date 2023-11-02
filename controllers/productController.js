@@ -296,9 +296,9 @@ exports.createProduct = async (req, res, next) => {
     next(error);
     console.log(error);
   } finally {
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
+    // if (req.file) {
+    //   fs.unlinkSync(req.file.path);
+    // }
   }
 };
 

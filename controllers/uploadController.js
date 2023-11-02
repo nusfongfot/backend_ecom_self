@@ -45,12 +45,12 @@ exports.uploadMultipleImages = async (req, res, next) => {
     next(error);
     console.error("Error: ", error);
   } finally {
-    if (req.files) {
-      for (const file of req.files) {
-        if (file.path) {
-          fs.unlinkSync(file.path);
-        }
-      }
-    }
+    // if (req.files) {
+    //   for (const file of req.files) {
+    //     if (file.path) {
+    //       fs.unlinkSync(file.path);
+    //     }
+    //   }
+    // }
   }
 };
