@@ -53,12 +53,8 @@ exports.getCommentByProductID = (req, res, next) => {
       WHERE p.pro_id = ?`,
       [id],
       function (err, results, fieldsDb) {
-        const starReview = results?.reduce((acc, val) => {
-          return acc + val.star
-        },0)
-        const avgStar =  starReview / results?.length 
         if (results?.length > 0) {
-          return res.status(200).json({ res_code: "0000", avgStar, results });
+          return res.status(200).json({ res_code: "0000", results });
         } else {
           return res
             .status(200)
