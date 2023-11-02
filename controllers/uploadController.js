@@ -17,9 +17,9 @@ exports.uploadSingleImage = async (req, res, next) => {
     console.log(error);
   } finally {
     //remove file from device
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
+    // if (req.file) {
+    //   fs.unlinkSync(req.file.path);
+    // }
   }
 };
 
