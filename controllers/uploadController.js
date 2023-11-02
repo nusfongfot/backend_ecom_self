@@ -1,6 +1,5 @@
 const UploadServices = require("../services/uploadServices");
 const fs = require("fs");
-const client = require("../connect_db");
 
 exports.uploadSingleImage = async (req, res, next) => {
   try {
@@ -8,7 +7,11 @@ exports.uploadSingleImage = async (req, res, next) => {
     if (req.file) {
       secureUrl = await UploadServices.upload(req.file.path);
     }
-    res.status(200).json({ res_code: "0000", secureUrl });
+    res.status(200).json({
+      res_code: "0000",
+      secureUrl,
+      message: "Images uploaded successfully",
+    });
   } catch (error) {
     next(error);
     console.log(error);

@@ -6,6 +6,7 @@ router.get("/products/category", productController.getProductByCate);
 router.get("/products/categories", productController.getCategories);
 router.get("/products/search", productController.getProductBySearch);
 router.get("/products", productController.getAllProduct);
+router.get("/products/price", productController.getProductByPriceRange);
 router.get("/products/:id", productController.getProductByID);
 
 router.post("/products", productController.createProduct);

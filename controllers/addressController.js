@@ -12,7 +12,7 @@ exports.getAddressById = async (req, res, next) => {
         if (results.length > 0) {
           return res.status(200).json({ res_code: "0000", total, results });
         } else {
-          return res.status(404).json({ message: "address not found" });
+          return res.status(200).json({ results, message: "Address not found" });
         }
       }
     );
@@ -158,8 +158,7 @@ exports.deleteAddress = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     const { authorization } = req.headers;
-    const { add_id } = req.body;
-
+    const { add_id } = req.query;
     const token = authorization.split(" ")[1];
     const privateKey = process.env.JSONWEB_SECRET;
     const payload = jwt.verify(token, privateKey);
@@ -348,10 +347,10 @@ exports.getZipCode = async (req, res, next) => {
       `,
       [province, amphoe, tambon],
       function (err, results, fieldsDb) {
-        if (results.length > 0) {
+        if (results?.length > 0) {
           return res
             .status(200)
-            .json({ res_code: "0000", zipcode: results[0].zipcode });
+            .json({ res_code: "0000", zipcode: results[0]?.zipcode });
         } else {
           return res.status(400).json({ message: "Not found" });
         }

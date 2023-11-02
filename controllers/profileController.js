@@ -12,7 +12,7 @@ exports.getAllProfile = async (req, res, next) => {
       "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at,role FROM customers WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
       [parseInt(limit), parseInt(offSet)],
       function (err, results, fields) {
-        const total = results.length;
+        const total = results?.length;
         return res.status(200).json({ res_code: "0000", total, results });
       }
     );
@@ -29,12 +29,14 @@ exports.getProfileById = async (req, res, next) => {
       "SELECT cus_id,name,surname,phone,email,username,photo_user,role FROM customers WHERE cus_id = ? AND deleted = 0",
       [id],
       function (err, results, fields) {
-        if (results.length > 0) {
+        if (results?.length > 0) {
           return res
             .status(200)
             .json({ res_code: "0000", message: "successfully", results });
         } else {
-          return res.status(404).json({ message: "user not found" });
+          return res
+            .status(404)
+            .json({ res_code: "5438", message: "User not found" });
         }
       }
     );
@@ -50,15 +52,17 @@ exports.updateProfileByID = async (req, res, next) => {
       req.body;
     const id = parseInt(req.params.id);
 
-    let secureUrl;
     if (req.file) {
-      secureUrl = await UploadServices.upload(req.file.path);
+      const secureUrl = await UploadServices.upload(req.file.path);
       client.query(
         `UPDATE customers SET photo_user = ? WHERE cus_id = ? AND deleted = 0`,
         [secureUrl, id],
         function (err, results, fields) {
-          if (results.affectedRows == 0) {
-            return res.status(400).json({ message: "User not found" });
+          if (err) return res.send(err);
+          if (results?.affectedRows == 0) {
+            return res
+              .status(400)
+              .json({ res_code: "5438", message: "User not found" });
           }
           client.query(
             `SELECT *,NULL AS password FROM customers WHERE cus_id = ?`,
@@ -104,7 +108,9 @@ exports.updateProfileByID = async (req, res, next) => {
     const values = [name, surname, phone, hashedPassword, username, id];
     client.query(updateQuery, values, function (err, results, fields) {
       if (results.affectedRows == 0) {
-        return res.status(400).json({ message: "User not found" });
+        return res
+          .status(400)
+          .json({ res_code: "5438", message: "User not found" });
       }
       client.query(
         `SELECT *,NULL AS password FROM customers WHERE cus_id = ?`,

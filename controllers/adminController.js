@@ -161,3 +161,21 @@ exports.getAllAdmins = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.getAllProfileUser = async (req, res, next) => {
+  try {
+    const { limit, offSet } = req.query;
+
+    client.query(
+      "SELECT cus_id,name,surname,phone,email,username,photo_user,created_at,role FROM customers WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      [parseInt(limit), parseInt(offSet)],
+      function (err, results, fields) {
+        const total = results?.length;
+        return res.status(200).json({ res_code: "0000", total, results });
+      }
+    );
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+};

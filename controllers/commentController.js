@@ -56,7 +56,9 @@ exports.getCommentByProductID = (req, res, next) => {
         if (results?.length > 0) {
           return res.status(200).json({ res_code: "0000", results });
         } else {
-          return res.status(400).json({ message: "Comment not found" });
+          return res
+            .status(200)
+            .json({ results, message: "Comment not found" });
         }
       }
     );

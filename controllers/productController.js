@@ -15,25 +15,36 @@ exports.getAllProduct = async (req, res, next) => {
           acc.push({ pro_id: val.pro_id, stock: total });
           return acc;
         }, []);
+
         const pro_id = products?.map((item) => item.pro_id);
 
+        let total = 0;
         client.query(
-          "SELECT * FROM products WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
-          [parseInt(limit), parseInt(offSet)],
-          function (err, results, fields) {
-            const newStock = products?.map((item) => item.stock);
-            const data = results?.map((item, index) => {
-              const productIndex = pro_id.indexOf(item.pro_id);
-              if (pro_id.includes(item.pro_id)) {
-                return {
-                  ...item,
-                  stock: newStock[productIndex],
-                };
+          "SELECT * FROM products WHERE deleted = 0 ORDER BY created_at DESC",
+          function (err, resultsTotal, fields) {
+            total = resultsTotal.length;
+            client.query(
+              "SELECT * FROM products WHERE deleted = 0 ORDER BY created_at DESC LIMIT ? OFFSET ?",
+              [parseInt(limit), parseInt(offSet)],
+              function (err, results, fields) {
+                const newStock = products?.map((item) => item.stock);
+                const data = results?.map((item, index) => {
+                  const productIndex = pro_id.indexOf(item.pro_id);
+                  if (pro_id.includes(item.pro_id)) {
+                    return {
+                      ...item,
+                      stock: newStock[productIndex],
+                    };
+                  }
+                  return item;
+                });
+                return res.status(200).json({
+                  res_code: "0000",
+                  total,
+                  products: data,
+                });
               }
-              return item;
-            });
-            const total = results?.length;
-            return res.status(200).json({ res_code: "0000", total, data });
+            );
           }
         );
       }
@@ -52,11 +63,41 @@ exports.getProductByID = async (req, res, next) => {
       [id],
       function (err, results, fields) {
         if (results.length > 0) {
-          res
-            .status(200)
-            .json({ res_code: "0000", message: "successfully", results });
+          res.status(200).json({
+            res_code: "0000",
+            message: "successfully",
+            products: results,
+          });
         } else {
           res.status(404).json({ message: "product not found" });
+        }
+      }
+    );
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+};
+
+exports.getProductByPriceRange = async (req, res, next) => {
+  try {
+    const { start, end } = req.query;
+    client.query(
+      "SELECT * FROM products WHERE price >= ? AND price <= ? AND deleted = 0 ORDER BY price ASC",
+      [start, end],
+      function (err, results, fields) {
+        const total = results?.length;
+        if (results.length > 0) {
+          res.status(200).json({
+            res_code: "0000",
+            total,
+            message: "successfully",
+            products: results,
+          });
+        } else {
+          res
+            .status(200)
+            .json({ products: results, message: "product not found" });
         }
       }
     );
@@ -75,7 +116,9 @@ exports.getProductByCate = async (req, res, next) => {
       [cate, parseInt(limit), parseInt(offSet)],
       (err, results) => {
         const total = results?.length;
-        return res.status(200).json({ res_code: "0000", total, results });
+        return res
+          .status(200)
+          .json({ res_code: "0000", total, products: results });
       }
     );
   } catch (error) {
@@ -87,22 +130,19 @@ exports.getProductByCate = async (req, res, next) => {
 exports.getProductBySearch = async (req, res, next) => {
   try {
     const { q, offSet, limit } = req.query;
-
     const sqlQuery = `
       SELECT * FROM products 
       WHERE LOWER(title) LIKE ? AND deleted = 0 
       LIMIT ? OFFSET ?;
     `;
 
-    const queryParam = "%" + q + "%";
+    const queryParam = "%" + q.toLowerCase().trim() + "%";
     const queryLimit = parseInt(limit);
     const queryOffset = parseInt(offSet);
-
-    // Execute the query using a promise-based approach
     const results = await new Promise((resolve, reject) => {
       client.query(
         sqlQuery,
-        [queryParam.toLocaleLowerCase(), queryLimit, queryOffset],
+        [queryParam, queryLimit, queryOffset],
         (err, results) => {
           if (err) {
             reject(err);
@@ -114,10 +154,14 @@ exports.getProductBySearch = async (req, res, next) => {
     });
 
     if (results.length === 0) {
-      return res.status(404).json({ message: "Product not found!" });
+      return res
+        .status(200)
+        .json({ products: [], message: "Product not found!" });
     } else {
       const total = results.length;
-      return res.status(200).json({ res_code: "0000", total, results });
+      return res
+        .status(200)
+        .json({ res_code: "0000", total, products: results });
     }
   } catch (error) {
     next(error);
@@ -243,7 +287,7 @@ exports.createProduct = async (req, res, next) => {
           return res.status(200).json({
             res_code: "0000",
             message: "Create product successfully",
-            fields,
+            products: fields,
           });
         }
       );
@@ -296,6 +340,7 @@ exports.getCategories = async (req, res, next) => {
       "home-decoration",
       "furniture",
       "tops",
+      "womens-shirts",
       "womens-dresses",
       "womens-shoes",
       "mens-shirts",
@@ -303,16 +348,11 @@ exports.getCategories = async (req, res, next) => {
       "mens-watches",
       "womens-watches",
       "womens-bags",
-      "womens-jewellery",
       "sunglasses",
       "lighting",
       "other",
     ];
     return res.status(200).json({ res_code: "0000", categories });
-    // const sqlQuery = `SELECT DISTINCT category FROM products`;
-    // client.query(sqlQuery, (err, results) => {
-    //   return res.status(200).json({ res_code: "0000", results });
-    // });
   } catch (error) {
     next(error);
     console.log(error);

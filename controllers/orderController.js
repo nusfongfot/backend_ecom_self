@@ -47,7 +47,7 @@ exports.getOrderById = async (req, res, next) => {
             .status(200)
             .json({ res_code: "0000", total_price, results });
         } else {
-          return res.status(404).json({ message: "Order not found" });
+          return res.status(200).json({ message: "Order not found" });
         }
       }
     );
@@ -77,7 +77,7 @@ exports.getHistoryOrderID = async (req, res, next) => {
             .status(200)
             .json({ res_code: "0000", total_price, total, results });
         } else {
-          return res.status(404).json({ message: "order not found" });
+          return res.status(200).json({ message: "Order not found" });
         }
       }
     );
@@ -89,48 +89,50 @@ exports.getHistoryOrderID = async (req, res, next) => {
 
 exports.createOrder = async (req, res, next) => {
   try {
-    const { cus_id, pro_id, add_id, items } = req.body;
+    const { orders } = req.body;
+    if (orders.length == 0) {
+      return res.status(400).json({ message: "orders is required!" });
+    }
 
-    if (!cus_id) {
-      return res.status(400).json({ message: "cus_id is required!" });
-    }
-    if (!pro_id) {
-      return res.status(400).json({ message: "pro_id is required!" });
-    }
-    if (!add_id) {
-      return res.status(400).json({ message: "add_id is required!" });
-    }
-    if (!items) {
-      return res.status(400).json({ message: "items is required!" });
-    }
-    client.query(
-      `SELECT pro_id FROM products WHERE pro_id = ?`,
-      [pro_id],
-      function (err, results, fieldsDb) {
-        if (results?.length == 0) {
-          return res
-            .status(400)
-            .json({ message: "Can not create because product not found" });
-        } else {
-          client.query(
-            `INSERT INTO orders (cus_id, pro_id, add_id,items) VALUES (?,?,?,?)`,
-            [cus_id, pro_id, add_id, items],
-            function (err, results, fieldsDb) {
-              if (!!results) {
-                return res.status(200).json({
-                  res_code: "0000",
-                  message: "Create order successfully",
-                });
-              } else {
-                return res
-                  .status(400)
-                  .json({ message: "Can not create order" });
-              }
+    const processOrders = orders.map((order) => {
+      return new Promise((resolve, reject) => {
+        const { cus_id, pro_id, add_id, items } = order;
+        client.query(
+          "SELECT pro_id FROM products WHERE pro_id = ?",
+          [pro_id],
+          (err, results, fieldsDb) => {
+            if (err) {
+              reject(err);
+            } else if (results?.length === 0) {
+              reject("Product not found");
+            } else {
+              client.query(
+                "INSERT INTO orders (cus_id, pro_id, add_id, items) VALUES (?, ?, ?, ?)",
+                [cus_id, pro_id, add_id, items],
+                (err, results, fieldsDb) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                }
+              );
             }
-          );
-        }
-      }
-    );
+          }
+        );
+      });
+    });
+
+    Promise.all(processOrders)
+      .then(() => {
+        return res.status(200).json({
+          res_code: "0000",
+          message: "Create order successfully",
+        });
+      })
+      .catch((error) => {
+        return res.status(400).json({ message: "Error creating orders" });
+      });
   } catch (error) {
     next(error);
     console.log(error);
